@@ -36,7 +36,12 @@ const provideLabelStyle = (mapData: MapDataCache, state: LineState) => [
   " ",
   {},
   ...Object.values(mapData)
-    .filter((value) => value.metadata.icon != null && (value.metadata.filterKey == null || state[value.metadata.filterKey]))
+    .flatMap((entry) => entry.loadedData)
+    .filter(
+      (value) =>
+        value.metadata.icon != null &&
+        (value.metadata.filterKey == null || state[value.metadata.filterKey])
+    )
     .map((value) => value.metadata.id)
     .sort()
     .flatMap((id) => [
@@ -101,20 +106,23 @@ export const OverviewMapComponent = (props: OverviewMapProps) => {
 
   const data = useData();
   // Give station icons and all labels the pointer cursor
-  const interactiveLayerIds = props.showLineLabels ? Object.values(data)
-    .filter(
-      (value) =>
-        value.metadata.filterKey == null ||
-        props.lines[value.metadata.filterKey]
-    )
-    .flatMap((value) => {
-      const id = value.metadata.id;
-      if (value.metadata.type === "rail-line") {
-        return [`${id}-station`, `${id}-labels`];
-      } else if (value.metadata.type === "rail-yard") {
-        return [`${id}-labels`];
-      }
-    }) : [];
+  const interactiveLayerIds = props.showLineLabels
+    ? Object.values(data)
+        .flatMap((entry) => entry.loadedData)
+        .filter(
+          (value) =>
+            value.metadata.filterKey == null ||
+            props.lines[value.metadata.filterKey]
+        )
+        .flatMap((value) => {
+          const id = value.metadata.id;
+          if (value.metadata.type === "rail-line") {
+            return [`${id}-station`, `${id}-labels`];
+          } else if (value.metadata.type === "rail-yard") {
+            return [`${id}-labels`];
+          }
+        })
+    : [];
 
   const isDarkTheme = useIsDarkTheme(props.appTheme);
 
@@ -160,7 +168,7 @@ export const OverviewMapComponent = (props: OverviewMapProps) => {
       onClick={handleClick}
       interactiveLayerIds={interactiveLayerIds}
       mapboxApiAccessToken={MAPBOX_KEY}
-      scrollZoom={({ speed: 0.25, smooth: true } as unknown) as boolean}
+      scrollZoom={{ speed: 0.25, smooth: true } as unknown as boolean}
       mapOptions={{
         customAttribution: ["Data: City of Ottawa"],
         hash: true,
@@ -169,6 +177,7 @@ export const OverviewMapComponent = (props: OverviewMapProps) => {
     >
       <LabelProviderContext.Provider value={{ labelStyle }}>
         {Object.values(data)
+          .flatMap((entry) => entry.loadedData)
           .filter((entry) => entry.metadata.icon != null)
           .map((entry) => (
             <MapIcon
@@ -247,39 +256,43 @@ export const OverviewMapComponent = (props: OverviewMapProps) => {
             }}
           />
         )}
-        {Object.entries(data).map(([key, data]) => {
-          if (
-            data.metadata?.type === "rail-line" &&
-            (data.metadata.filterKey == null ||
-              props.lines[data.metadata.filterKey])
-          ) {
-            return (
-              <Line
-                data={data}
-                name={data.metadata.id}
-                key={data.metadata.id}
-                offset={data.metadata.offset ?? 0}
-                color={data.metadata.color ?? "#212121"}
-                showLineLabels={props.showLineLabels}
-                activeAlternatives={props.alternatives[data.metadata.filterKey]}
-              />
-            );
-          } else if (
-            data.metadata?.type === "rail-yard" &&
-            (data.metadata.filterKey == null ||
-              props.lines[data.metadata.filterKey])
-          ) {
-            return (
-              <RailYard
-                key={data.metadata.id}
-                name={data.metadata.id}
-                data={data}
-                showLabels={props.showLineLabels}
-                offset={data.metadata.offset ?? 0}
-              />
-            );
-          }
-        })}
+        {Object.values(data)
+          .flatMap((entry) => entry.loadedData)
+          .map((data) => {
+            if (
+              data.metadata?.type === "rail-line" &&
+              (data.metadata.filterKey == null ||
+                props.lines[data.metadata.filterKey])
+            ) {
+              return (
+                <Line
+                  data={data}
+                  name={data.metadata.id}
+                  key={data.metadata.id}
+                  offset={data.metadata.offset ?? 0}
+                  color={data.metadata.color ?? "#212121"}
+                  showLineLabels={props.showLineLabels}
+                  activeAlternatives={
+                    props.alternatives[data.metadata.filterKey]
+                  }
+                />
+              );
+            } else if (
+              data.metadata?.type === "rail-yard" &&
+              (data.metadata.filterKey == null ||
+                props.lines[data.metadata.filterKey])
+            ) {
+              return (
+                <RailYard
+                  key={data.metadata.id}
+                  name={data.metadata.id}
+                  data={data}
+                  showLabels={props.showLineLabels}
+                  offset={data.metadata.offset ?? 0}
+                />
+              );
+            }
+          })}
       </LabelProviderContext.Provider>
     </Map>
   );

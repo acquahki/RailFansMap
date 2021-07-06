@@ -64,7 +64,7 @@ const getPreloadedState = () => {
   });
 };
 
-const store = configureStore({
+const store: any = configureStore({
   reducer,
   preloadedState: getPreloadedState(),
 });

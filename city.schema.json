@@ -16,21 +16,51 @@
           "minItems": 2,
           "maxItems": 2,
           "items": { "type": "number" },
-          "additionalItems": false
+          "additionalItems": false,
+          "title": "Region Location",
+          "description": "LngLat location to use as the location of a label for this region"
         },
         "bbox": {
           "type": "array",
           "minItems": 4,
           "maxItems": 4,
           "items": { "type": "number" },
-          "additionalItems": false
+          "additionalItems": false,
+          "title": "Region Bounding Box",
+          "description": "A 2D bounding box that contains all of the data in this region, used to determine when to load the agencies in the region"
         },
-        "data": {
+        "name": {
+          "type": "string",
+          "title": "Region Name",
+          "description": "The name of the region "
+        },
+        "agencies": {
+          "title": "Agencies",
+          "descirption": "",
           "type": "array",
-          "items": { "type": "string" }
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "title": "Agency Name",
+                "description": "Name of the agency, or transit system",
+                "type": "string"
+              },
+              "data": {
+                "title": "Agency Data",
+                "description": "List of all .geojson files containing data for this agency/system",
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "format": "uri-reference"
+                }
+              }
+            },
+            "required": ["name", "data"]
+          }
         }
       },
-      "required": ["location", "bbox", "data"]
+      "required": ["location", "bbox", "name", "agencies"]
     }
   }
 }
