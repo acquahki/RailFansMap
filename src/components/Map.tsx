@@ -135,17 +135,17 @@ export const OverviewMap = (props: OverviewMapProps) => {
     setMapTarget(undefined);
     setLastLocation([v.longitude, v.latitude, v.zoom, v.bearing ?? 0]);
 
-    if (mapRef.current != null) {
-      const map: MapboxMap = mapRef.current.getMap();
-      const bounds = map.getBounds();
+    // if (mapRef.current != null) {
+    //   const map: MapboxMap = mapRef.current.getMap();
+    //   const bounds = map.getBounds();
 
-      props.updateBbox([
-        bounds.getWest(),
-        bounds.getSouth(),
-        bounds.getEast(),
-        bounds.getNorth(),
-      ]);
-    }
+    //   props.updateBbox([
+    //     bounds.getWest(),
+    //     bounds.getSouth(),
+    //     bounds.getEast(),
+    //     bounds.getNorth(),
+    //   ]);
+    // }
   };
 
   useEffect(() => {
