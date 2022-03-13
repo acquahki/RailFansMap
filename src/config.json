@@ -101,7 +101,8 @@
         "montreal/green.json",
         "montreal/orange.json",
         "montreal/blue.json",
-        "montreal/yellow.json"
+        "montreal/yellow.json",
+        "montreal/blueExtension.json"
       ]
     },
     {
