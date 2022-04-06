@@ -13,13 +13,14 @@ import {
 } from "@mui/material";
 import styled from "styled-components";
 import { MenuDrawer } from "./MenuDrawer";
-import { Agency } from "../../config";
-import { Dataset } from "../../hooks/useData";
+import { Agency, Metadata } from "../../config";
+import { LoadedMetadata } from "../../hooks/useData";
 import { Chevron } from "../Chevron";
 import { BBox } from "geojson";
 import { SimpleBBox, useMapTarget } from "../../hooks/useMapTarget";
 import { useAppState } from "../../hooks/useAppState";
 import { useWindow } from "../../hooks/useWindow";
+import { isLineEnabled } from "../../app/utils";
 
 type EntryData = {
   id: string;
@@ -32,9 +33,8 @@ type EntryData = {
 };
 
 type LegendDrawerProps = {
-  visible: Agency[];
-  allAgencies: Agency[];
-  data: Dataset;
+  allAgencies: { [key: string]: Agency };
+  lines: { [key: string]: LoadedMetadata };
 };
 
 type LegendGroupProps = {
@@ -88,7 +88,8 @@ const LegendEntry = (props: LegendEntryProps) => {
       dense
       checked={props.enabled}
       secondaryAction={
-        props.filterKey && (
+        props.filterKey &&
+        !props.filterKey.startsWith("!") && (
           <Checkbox
             style={{ color: props.tint }}
             checked={props.enabled}
@@ -162,20 +163,14 @@ const LegendGroup = (props: LegendGroupProps) => {
       </LegendGroupHeader>
       <Collapse in={open}>
         {props.entries.map((entry) => {
-          const filterKey = entry.filterKey;
-          let enabled: boolean;
-          if (filterKey === undefined) {
-            enabled = true;
-          } else {
-            enabled = lineFilterState[filterKey] ?? false;
-          }
+          const enabled = isLineEnabled(entry.filterKey, lineFilterState);
           return (
             <LegendEntry
               key={entry.id}
               {...entry}
               enabled={enabled}
               onChecked={() => {
-                setLineFiltered(filterKey, !enabled);
+                setLineFiltered(entry.filterKey, !enabled);
               }}
             />
           );
@@ -189,6 +184,16 @@ const LegendGroup = (props: LegendGroupProps) => {
 export const LegendDrawer = (props: LegendDrawerProps) => {
   const { legendDrawerOpen, setLegendDrawerOpen } = useAppState();
 
+  const agencyMap: { [key: string]: LoadedMetadata[] } = {};
+  Object.values(props.lines).forEach((line) => {
+    const agency = line.agency;
+    if (agencyMap[agency] == null) {
+      agencyMap[agency] = [];
+    }
+
+    agencyMap[agency].push(line);
+  });
+
   return (
     <MenuDrawer
       open={legendDrawerOpen}
@@ -196,12 +201,8 @@ export const LegendDrawer = (props: LegendDrawerProps) => {
       title="Map Legend"
     >
       <List>
-        {props.allAgencies.map((value) => {
-          const entries: EntryData[] = value.data
-            .map((id) => ({
-              ...props.data[id]?.metadata,
-              bbox: props.data[id]?.bbox,
-            }))
+        {Object.entries(agencyMap).map(([key, values]) => {
+          const entries: EntryData[] = values
             .filter((metadata) => metadata?.type === "rail-line")
             .map((metadata) => ({
               id: metadata.id,
@@ -213,7 +214,11 @@ export const LegendDrawer = (props: LegendDrawerProps) => {
               filterKey: metadata.filterKey,
             }));
           return (
-            <LegendGroup agency={value} key={value.id} entries={entries} />
+            <LegendGroup
+              agency={props.allAgencies[key]}
+              key={key}
+              entries={entries}
+            />
           );
         })}
       </List>
