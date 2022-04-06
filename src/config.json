@@ -121,6 +121,18 @@
         "montreal/yellow.json",
         "montreal/blueExtension.json"
       ]
+    },
+    {
+      "id": "ets",
+      "name": "ETS",
+      "bbox": [],
+      "data": [
+        "edmonton/capital.json",
+        "edmonton/metro.json",
+        "edmonton/valley.json",
+        "edmonton/gerryWrightOMF.json",
+        "edmonton/macDonaldYard.json"
+      ]
     }
   ],
   "regions": [
@@ -164,6 +176,13 @@
       "agencies": ["stm"],
       "location": [-73.59991, 45.49535],
       "bbox": [-73.7215378, 45.4462383, -73.5219729, 45.59739776405928]
+    },
+    {
+      "id": "edmonton",
+      "title": "Edmonton",
+      "agencies": ["ets"],
+      "location": [-113.507996, 53.535411],
+      "bbox": []
     }
   ]
 }

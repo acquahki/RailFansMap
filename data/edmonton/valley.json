@@ -1,0 +1,31 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "id": "edmonton/valley",
+    "type": "rail-line",
+    "color": "#___",
+    "icon": "edmonton/valley.svg",
+    "name": "Valley Line",
+    "description": "102 Street - Mill Woods (Opening Summer 2022)",
+    "sources": ["OpenStreetMap", "City of Edmonton"]
+  },
+  "bbox": [],
+  "features": [
+    { "type": "Feature", "properties": { "lines": ["edmonton/valley"], "type": "station-label", "name": "102 Street", "major": true}, "geometry": { "type": "Point", "coordinates": [  ] } },
+    { "type": "Feature", "properties": { "lines": ["edmonton/capital", "edmonton/metro", "edmonton/valley"], "type": "station-label", "name": "Churchill", "major": true}, "geometry": { "type": "Point", "coordinates": [  ] } },
+    { "type": "Feature", "properties": { "lines": ["edmonton/valley"], "type": "station-label", "name": "Quarters"}, "geometry": { "type": "Point", "coordinates": [  ] } },
+    { "type": "Feature", "properties": { "lines": ["edmonton/valley"], "type": "station-label", "name": "Muttart"}, "geometry": { "type": "Point", "coordinates": [  ] } },
+    { "type": "Feature", "properties": { "lines": ["edmonton/valley"], "type": "station-label", "name": "Strathearn"}, "geometry": { "type": "Point", "coordinates": [  ] } },
+    { "type": "Feature", "properties": { "lines": ["edmonton/valley"], "type": "station-label", "name": "Holyrod"}, "geometry": { "type": "Point", "coordinates": [  ] } },
+    { "type": "Feature", "properties": { "lines": ["edmonton/valley"], "type": "station-label", "name": "Bonnie Doon"}, "geometry": { "type": "Point", "coordinates": [  ] } },
+    { "type": "Feature", "properties": { "lines": ["edmonton/valley"], "type": "station-label", "name": "Avonmore"}, "geometry": { "type": "Point", "coordinates": [  ] } },
+    { "type": "Feature", "properties": { "lines": ["edmonton/valley"], "type": "station-label", "name": "Davies"}, "geometry": { "type": "Point", "coordinates": [  ] } },
+    { "type": "Feature", "properties": { "lines": ["edmonton/valley"], "type": "station-label", "name": "Milbourne/Woodvale"}, "geometry": { "type": "Point", "coordinates": [  ] } },
+    { "type": "Feature", "properties": { "lines": ["edmonton/valley"], "type": "station-label", "name": "Grey Nuns"}, "geometry": { "type": "Point", "coordinates": [  ] } },
+    { "type": "Feature", "properties": { "lines": ["edmonton/valley"], "type": "station-label", "name": "Mill Woods", "major": true}, "geometry": { "type": "Point", "coordinates": [  ] } }
+
+
+
+
+  ]
+}

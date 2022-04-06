@@ -1,0 +1,26 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "id": "edmonton/metro",
+    "type": "rail-line",
+    "color": "#___",
+    "icon": "edmonton/metro.svg",
+    "name": "Metro Line",
+    "description": "NAIT - Health Sciences/Jubilee",
+    "sources": ["OpenStreetMap"]
+  },
+  "bbox": [],
+  "features": [
+    { "type": "Feature", "properties": { "lines": ["edmonton/metro"], "type": "station-label", "name": "NAIT", "major": true}, "geometry": { "type": "Point", "coordinates": [  ] } },
+    { "type": "Feature", "properties": { "lines": ["edmonton/metro"], "type": "station-label", "name": "Kingsway/Royal Alex"}, "geometry": { "type": "Point", "coordinates": [  ] } },
+    { "type": "Feature", "properties": { "lines": ["edmonton/metro"], "type": "station-label", "name": "MacEwan"}, "geometry": { "type": "Point", "coordinates": [  ] } },
+    { "type": "Feature", "properties": { "lines": ["edmonton/capital", "edmonton/metro", "edmonton/valley"], "type": "station-label", "name": "Churchill", "major": true}, "geometry": { "type": "Point", "coordinates": [  ] } },
+    { "type": "Feature", "properties": { "lines": ["edmonton/capital", "edmonton/metro"], "type": "station-label", "name": "Central"}, "geometry": { "type": "Point", "coordinates": [  ] } },
+    { "type": "Feature", "properties": { "lines": ["edmonton/capital", "edmonton/metro"], "type": "station-label", "name": "Bay/Enterprise Square"}, "geometry": { "type": "Point", "coordinates": [  ] } },
+    { "type": "Feature", "properties": { "lines": ["edmonton/capital", "edmonton/metro"], "type": "station-label", "name": "Corona"}, "geometry": { "type": "Point", "coordinates": [  ] } },
+    { "type": "Feature", "properties": { "lines": ["edmonton/capital", "edmonton/metro"], "type": "station-label", "name": "Government Centre"}, "geometry": { "type": "Point", "coordinates": [  ] } },
+    { "type": "Feature", "properties": { "lines": ["edmonton/capital", "edmonton/metro"], "type": "station-label", "name": "University"}, "geometry": { "type": "Point", "coordinates": [  ] } },
+    { "type": "Feature", "properties": { "lines": ["edmonton/capital", "edmonton/metro"], "type": "station-label", "name": "Health Sciences/Jubilee", "major": true}, "geometry": { "type": "Point", "coordinates": [  ] } }
+    
+  ]
+}

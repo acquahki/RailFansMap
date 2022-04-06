@@ -1,0 +1,15 @@
+{
+    "type": "FeatureCollection",
+    "metadata": {
+      "type": "rail-yard",
+      "id": "edmonton/gerryWrightOMF",
+      "name": "Gerry Wright Operations and Maintenance Facility",
+      "description": "Operations and Maintenance Facility for the Valley Line.",
+      "sources": ["OpenStreetMap"]
+    },
+    "bbox": [],
+    "features": [
+        { "type": "Feature", "properties": { "type": "tracks" }, "geometry": { "type": "LineString", "coordinates": [  ] } },
+        { "type": "Feature", "properties": { "type": "yard-label", "name": "Gerry Wright OMF" }, "geometry": { "type": "Point", "coordinates": [] } }
+    ]
+  }
