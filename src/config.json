@@ -1,6 +1,27 @@
 {
   "agencies": [
     {
+      "id": "exo",
+      "name": "exo",
+      "bbox": [-74.1418435, 45.3606006, -73.177615, 45.7734934],
+      "data": [
+        "exo/exo1.json",
+        "exo/exo2.json",
+        "exo/exo3.json",
+        "exo/exo4.json",
+        "exo/exo5.json"
+      ]
+    },
+    {
+      "id": "grt",
+      "name": "GRT",
+      "bbox": [ -80.545261, 43.419397, -80.44124409556389, 43.501633 ],
+      "data": [
+        "waterloo/ion.json",
+        "waterloo/ionOMSF.json"
+      ]
+    },
+    {
       "id": "oc-transpo",
       "name": "OC Transpo",
       "bbox": [
@@ -32,7 +53,7 @@
     {
       "id": "ttc",
       "name": "TTC",
-      "bbox": [-79.60331150195182, 43.6356882, -79.2449002, 43.795826398803186],
+      "bbox": [-79.60331150195182,43.63443706290249,-79.2443698561092,43.857232769665806],
       "data": [
         "toronto/davisvilleYard.json",
         "toronto/wilsonYard.json",
@@ -43,12 +64,54 @@
         "toronto/finchMSF.json",
         "toronto/sheppardWye.json",
         "toronto/bloorYongeConnectors.json",
+        "toronto/ontarioLineMSF.json",
+        "toronto/ynseTSF.json",
         "toronto/line1.json",
         "toronto/line2.json",
         "toronto/line3.json",
         "toronto/line4.json",
         "toronto/line5.json",
-        "toronto/line6.json"
+        "toronto/line6.json",
+        "toronto/line5west.json",
+        "toronto/sse.json",
+        "toronto/ontarioLine.json",
+        "toronto/ynse.json"
+      ]
+    },
+    {
+      "id": "go",
+      "name": "GO",
+      "bbox": [-81.2493479999999, 42.98024840000009, -78.885068, 44.3737523],
+      "data": [
+        "go/br.json",
+        "go/ki.json",
+        "go/le.json",
+        "go/lw.json",
+        "go/mi.json",
+        "go/rh.json",
+        "go/st.json",
+        "go/up.json"
+      ]
+    },
+    {
+      "id": "stm",
+      "name": "STM",
+      "bbox": [-73.7215378, 45.4462383, -73.5219729, 45.5971494],
+      "data": [
+        "montreal/green.json",
+        "montreal/orange.json",
+        "montreal/blue.json",
+        "montreal/yellow.json",
+        "montreal/blueExtension.json"
+      ]
+    },
+    {
+      "id": "rem",
+      "name": "REM",
+      "bbox": [-73.9144974,45.4305912,-73.425561,45.67481794612502],
+      "data": [
+        "montreal/rem.json",
+        "montreal/remEst.json"
       ]
     },
     {
@@ -89,6 +152,13 @@
   ],
   "regions": [
     {
+      "id": "waterloo",
+      "title": "Kitchener-Waterloo",
+      "agencies": ["grt"],
+      "location": [-80.5, 43.466667],
+      "bbox": [-80.54520517587662, 43.4221650454896, -80.44124409556389, 43.50163426403371]
+    },
+    {
       "id": "ottawa-gatineau",
       "title": "Ottawa-Gatineau",
       "agencies": ["oc-transpo", "sto"],
@@ -103,14 +173,14 @@
       "title": "Toronto",
       "agencies": ["ttc"],
       "location": [-79.383849, 43.653482],
-      "bbox": [-79.60331150195182, 43.6356882, -79.2449002, 43.795826398803186]
+      "bbox": [-79.60331150195182, 43.63443706290249, -79.2443698561092, 43.795826398803186]
     },
     {
       "id": "montreal",
       "title": "Montréal",
-      "agencies": ["rem", "stm"],
+      "agencies": ["rem", "stm", "exo"],
       "location": [-73.59991, 45.49535],
-      "bbox": [-73.9144974, 45.4305912, -73.425561, 45.67481794612502]
+      "bbox": [-74.1418435, 45.3606006, -73.177615, 45.7734934]
     }
   ]
 }
