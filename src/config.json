@@ -1,12 +1,6 @@
 {
   "agencies": [
     {
-      "id": "grt",
-      "name": "GRT",
-      "bbox": [-80.545261, 43.419397, -80.44124409556389, 43.501633],
-      "data": ["waterloo/ion.json", "waterloo/ionOMSF.json"]
-    },
-    {
       "id": "oc-transpo",
       "name": "OC Transpo",
       "bbox": [
@@ -27,19 +21,25 @@
       ]
     },
     {
-      "id": "rtc",
-      "name": "RTC",
-      "bbox": [-71.353707, 46.760213, -71.211037, 46.846826],
-      "data": ["quebec/tramway.json"]
+      "id": "stm",
+      "name": "STM",
+      "bbox": [
+        -73.7260800545552, 45.44372029100138, -73.52186189872911,
+        45.59972319599818
+      ],
+      "data": [
+        "montreal/green.json",
+        "montreal/orange.json",
+        "montreal/yellow.json",
+        "montreal/blue.json",
+        "montreal/blueExtension.json"
+      ]
     },
     {
-      "id": "sto",
-      "name": "STO",
-      "bbox": [
-        -75.86578535776559, 45.39536917415158, -75.69585303512089,
-        45.43724924103122
-      ],
-      "data": ["gatineau/a.json", "gatineau/b.json"]
+      "id": "rem",
+      "name": "REM",
+      "bbox": [-73.9144974, 45.4305912, -73.425561, 45.67481794612502],
+      "data": ["montreal/rem.json"]
     },
     {
       "id": "ttc",
@@ -66,10 +66,10 @@
         "toronto/line4.json",
         "toronto/line5.json",
         "toronto/line6.json",
-        "toronto/line5west.json",
+        "toronto/ynse.json",
         "toronto/sse.json",
         "toronto/ontarioLine.json",
-        "toronto/ynse.json"
+        "toronto/line5west.json"
       ]
     },
     {
@@ -77,22 +77,22 @@
       "name": "TTC - Streetcar",
       "bbox": [-79.544722, 43.591514, -79.281164, 43.689348391718475],
       "data": [
-      	"toronto/streetcar/hillcrestComplex.json",
+        "toronto/streetcar/hillcrestComplex.json",
         "toronto/streetcar/leslieBarns.json",
         "toronto/streetcar/roncesvallesCarhouse.json",
         "toronto/streetcar/russellCarhouse.json",
         "toronto/streetcar/streetcarLoops.json",
         "toronto/streetcar/streetcarConnectors.json",
 
-	      "toronto/streetcar/route501.json",
+        "toronto/streetcar/route501.json",
         "toronto/streetcar/route503.json",
-	      "toronto/streetcar/route504.json",
-	      "toronto/streetcar/route505.json",
-	      "toronto/streetcar/route506.json",
-      	"toronto/streetcar/route509.json",
-      	"toronto/streetcar/route510.json",
-	      "toronto/streetcar/route511.json",
-	      "toronto/streetcar/route512.json"
+        "toronto/streetcar/route504.json",
+        "toronto/streetcar/route505.json",
+        "toronto/streetcar/route506.json",
+        "toronto/streetcar/route509.json",
+        "toronto/streetcar/route510.json",
+        "toronto/streetcar/route511.json",
+        "toronto/streetcar/route512.json"
       ]
     },
     {
@@ -111,33 +111,33 @@
       ]
     },
     {
-      "id": "stm",
-      "name": "STM (Preview)",
-      "bbox": [-73.7215378, 45.4462383, -73.5219729, 45.59739776405928],
+      "id": "grt",
+      "name": "GRT",
+      "bbox": [-80.545261, 43.35583057283434, -80.30597750531045, 43.501633],
       "data": [
-        "montreal/green.json",
-        "montreal/orange.json",
-        "montreal/blue.json",
-        "montreal/yellow.json",
-        "montreal/blueExtension.json"
+        "waterloo/ion.json",
+        "waterloo/ionOMSF.json",
+        "waterloo/ion-stage2.json"
       ]
+    },
+    {
+      "id": "rtc",
+      "name": "RTC",
+      "bbox": [-71.353707, 46.760213, -71.211037, 46.846826],
+      "data": ["quebec/tramway.json"]
+    },
+    {
+      "id": "sto",
+      "name": "STO",
+      "bbox": [
+        -75.86578535776559, 45.39536917415158, -75.69585303512089,
+        45.43724924103122
+      ],
+      "data": ["gatineau/a.json", "gatineau/b.json"]
     }
   ],
+
   "regions": [
-    {
-      "id": "waterloo",
-      "title": "Kitchener-Waterloo",
-      "agencies": ["grt"],
-      "location": [-80.5, 43.466667],
-      "bbox": [-80.545261, 43.419397, -80.44124409556389, 43.501633]
-    },
-    {
-      "id": "quebec",
-      "title": "Québec City",
-      "agencies": ["rtc"],
-      "location": [-71.235223, 46.82596],
-      "bbox": [-71.353707, 46.760213, -71.211037, 46.846826]
-    },
     {
       "id": "ottawa-gatineau",
       "title": "Ottawa-Gatineau",
@@ -149,21 +149,34 @@
       ]
     },
     {
+      "id": "montreal",
+      "title": "Montréal",
+      "agencies": ["stm", "rem"],
+      "location": [-73.59991, 45.49535],
+      "bbox": [-73.9144974, 45.4305912, -73.425561, 45.59972319599818]
+    },
+    {
       "id": "toronto",
       "title": "Toronto",
       "agencies": ["ttc", "ttcStreetcar"],
       "location": [-79.383849, 43.653482],
       "bbox": [
-        -79.60331150195182, 43.63443706290249, -79.2443698561092,
-        43.795826398803186
+        -79.60331150195182, 43.591514, -79.2443698561092, 43.857232769665806
       ]
     },
     {
-      "id": "montreal",
-      "title": "Montréal",
-      "agencies": ["stm"],
-      "location": [-73.59991, 45.49535],
-      "bbox": [-73.7215378, 45.4462383, -73.5219729, 45.59739776405928]
+      "id": "waterloo",
+      "title": "Kitchener-Waterloo",
+      "agencies": ["grt"],
+      "location": [-80.5, 43.466667],
+      "bbox": [-80.545261, 43.35583057283434, -80.30597750531045, 43.501633]
+    },
+    {
+      "id": "quebec",
+      "title": "Québec City",
+      "agencies": ["rtc"],
+      "location": [-71.235223, 46.82596],
+      "bbox": [-71.353707, 46.760213, -71.211037, 46.846826]
     }
   ]
 }

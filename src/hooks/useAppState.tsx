@@ -18,7 +18,12 @@ export type LegendGroupState = {
   [key: string]: boolean;
 };
 
-export type ViewportSettings = [lng: number, lat: number, zoom: number, bearing: number];
+export type ViewportSettings = [
+  lng: number,
+  lat: number,
+  zoom: number,
+  bearing: number
+];
 
 type AppState = {
   settingsDrawerOpen: boolean;
@@ -35,6 +40,7 @@ type AppState = {
   legendGroupState: LegendGroupState;
 
   lastLocation: ViewportSettings | null;
+  showGeolocation: boolean;
 };
 
 type AppStateActions = {
@@ -52,6 +58,7 @@ type AppStateActions = {
   setLegendGroupOpen: (key: string, open: boolean) => void;
 
   setLastLocation: (location: ViewportSettings) => void;
+  setShowGeolocation: (show: boolean) => void;
 };
 
 type UseAppState = AppState & AppStateActions;
@@ -66,6 +73,8 @@ const readLocalSettings = (): Partial<AppState> => {
   if (saved.version == null) {
     const { showLineLabels, ...rest } = saved;
     return { ...rest, showLabels: showLineLabels };
+  } else if (saved.version < "3.4.2") {
+    return { ...saved, showLabels: true };
   } else {
     return saved;
   }
@@ -101,7 +110,16 @@ const writeSettings = (state: AppState) => {
   const { settingsDrawerOpen, legendDrawerOpen, shareSheetOpen, ...rest } =
     state;
 
-  localStorage["settings"] = JSON.stringify({ ...rest, version: "3.2" });
+  localStorage["settings"] = JSON.stringify({ ...rest, version: "3.4.2" });
+};
+
+const saved = readLocalSettings();
+const params = readSearchParamsSettings();
+
+const merged = {
+  ...saved,
+  ...params,
+  lineFilterState: { ...saved.lineFilterState, ...params.lineFilterState },
 };
 
 const useProvideAppContext = (): UseAppState => {
@@ -110,36 +128,26 @@ const useProvideAppContext = (): UseAppState => {
   const [shareSheetOpen, setShareSheetOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
 
-  const [show3DBuildings, setShow3DBuildings] = useState(false);
-  const [showLabels, setShowLabels] = useState(true);
-  const [appTheme, setAppTheme] = useState<AppTheme>("system");
-  const [mapStyle, setMapStyle] = useState<MapStyle>("vector");
-  const [lastLocation, setLastLocation] = useState<ViewportSettings>(null);
-
-  const [lineFilterState, setLineFilterState] = useState<LineFilterState>({});
-  const [legendGroupState, setLegendGroupState] = useState<LegendGroupState>(
-    {}
+  const [show3DBuildings, setShow3DBuildings] = useState(
+    merged.show3DBuildings ?? false
+  );
+  const [showLabels, setShowLabels] = useState(merged.showLabels ?? true);
+  const [appTheme, setAppTheme] = useState<AppTheme>(
+    merged.appTheme ?? "system"
+  );
+  const [mapStyle, setMapStyle] = useState<MapStyle>(
+    merged.mapStyle ?? "vector"
+  );
+  const [lastLocation, setLastLocation] = useState<ViewportSettings>(
+    merged.lastLocation
   );
 
-  // Load initial state from localstorage and param overrides
-  useEffect(() => {
-    const saved = readLocalSettings();
-    const params = readSearchParamsSettings();
-
-    const merged = {
-      ...saved,
-      ...params,
-      lineFilterState: { ...saved.lineFilterState, ...params.lineFilterState },
-    };
-
-    setShow3DBuildings(merged.show3DBuildings ?? false);
-    setShowLabels(merged.showLabels ?? true);
-    setAppTheme(merged.appTheme ?? "system");
-    setMapStyle(merged.mapStyle ?? "vector");
-    setLineFilterState(merged.lineFilterState ?? {});
-    setLegendGroupState(merged.legendGroupState ?? {});
-    setLastLocation(merged.lastLocation)
-  }, []);
+  const [lineFilterState, setLineFilterState] = useState<LineFilterState>(
+    merged.lineFilterState ?? {}
+  );
+  const [legendGroupState, setLegendGroupState] = useState<LegendGroupState>(
+    merged.legendGroupState ?? {}
+  );
 
   const setLineFiltered = (filterKey: string, show: boolean) => {
     setLineFilterState({ ...lineFilterState, [filterKey]: show });
@@ -148,6 +156,10 @@ const useProvideAppContext = (): UseAppState => {
   const setLegendGroupOpen = (key: string, open: boolean) => {
     setLegendGroupState({ ...legendGroupState, [key]: open });
   };
+
+  const [showGeolocation, setShowGeolocation] = useState(
+    merged.showGeolocation ?? true
+  );
 
   const state = {
     settingsDrawerOpen,
@@ -181,7 +193,10 @@ const useProvideAppContext = (): UseAppState => {
     setLegendGroupOpen,
 
     lastLocation,
-    setLastLocation
+    setLastLocation,
+
+    showGeolocation,
+    setShowGeolocation,
   };
 
   // Write settings to localstorage on every update

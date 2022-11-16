@@ -1,12 +1,14 @@
-import React, { useEffect, useRef, useState } from "react";
-import MapGL, {
-  Viewport,
+import React, { useEffect, useRef, useState, useCallback } from "react";
+import Map, {
+  ViewState,
+  MapRef,
+  ViewStateChangeEvent,
   Layer,
-  NavigationControl,
   Source,
   AttributionControl,
-} from "@urbica/react-map-gl";
-import { PaddingOptions } from "mapbox-gl";
+  Popup,
+} from "react-map-gl";
+import { Coordinate, LngLat, PaddingOptions } from "mapbox-gl";
 
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Lines } from "./Line";
@@ -14,8 +16,8 @@ import { Lines } from "./Line";
 import { isLineEnabled, useIsDarkTheme } from "../app/utils";
 import { MapIcon } from "./Icons";
 import { useWindow } from "../hooks/useWindow";
-import labelBackground from "../images/label.svg";
-import { FeatureCollection } from "geojson";
+import labelBackground from "../images/label.png";
+import { FeatureCollection, Position } from "geojson";
 import { SimpleBBox, useMapTarget } from "../hooks/useMapTarget";
 import {
   LineFilterState,
@@ -24,6 +26,8 @@ import {
 } from "../hooks/useAppState";
 import { useTheme } from "@mui/styles";
 import { config, Metadata } from "../config";
+import { MapControls } from "./MapControls";
+import { useGeolocation } from "../hooks/useGeolocation";
 
 const provideLabelStyle = (
   lines: { [key: string]: Metadata },
@@ -47,12 +51,24 @@ const provideLabelStyle = (
 ];
 
 // Provides a list of all state keys that are false, i.e. the features to hide
-const provideFilterList = (state: LineFilterState): string[] => {
-  const basic = Object.entries(state)
+const provideFilterList = (
+  state: LineFilterState,
+  lines: Metadata[]
+): string[] => {
+  const fullState = { ...state };
+  lines
+    .filter((line) => !line.filterKey?.startsWith("!"))
+    .forEach((line) => {
+      if (line.filterKey && !fullState.hasOwnProperty(line.filterKey)) {
+        fullState[line.filterKey] = false;
+      }
+    });
+
+  const basic = Object.entries(fullState)
     .filter(([_, value]) => !value)
     .map(([key]) => key);
 
-  const inverse = Object.entries(state)
+  const inverse = Object.entries(fullState)
     .filter(([_, value]) => value)
     .map(([key]) => `!${key}`);
 
@@ -88,6 +104,25 @@ const regionFeatures = config.regions.map((region) => ({
 }));
 const regionData = { type: "FeatureCollection", features: regionFeatures };
 
+// Used to restore last location if no location hash is provided
+const lastLocation: ViewportSettings =
+  localStorage["settings"] != null
+    ? JSON.parse(localStorage["settings"]).lastLocation
+    : null;
+
+const initialLocation: Partial<ViewState> = lastLocation
+  ? {
+      longitude: lastLocation[0],
+      latitude: lastLocation[1],
+      zoom: lastLocation[2],
+      bearing: lastLocation[3],
+    }
+  : {
+      longitude: -73.5713,
+      latitude: 45.5163,
+      zoom: 11.35,
+    };
+
 export const OverviewMap = (props: OverviewMapProps) => {
   const theme = useTheme();
   const windowSize = useWindow();
@@ -100,32 +135,10 @@ export const OverviewMap = (props: OverviewMapProps) => {
     showLabels,
     lineFilterState,
     setLastLocation,
+    showGeolocation,
   } = useAppState();
 
-  // Used to restore last location if no location hash is provided
-  const lastLocation: ViewportSettings =
-    localStorage["settings"] != null
-      ? JSON.parse(localStorage["settings"]).lastLocation
-      : null;
-
-  const mapRef = useRef<MapGL>();
-  // TODO: Fix?
-  const [mapLoaded, setMapLoaded] = useState<boolean>(false);
-
-  const [viewport, setViewport] = useState<Viewport>(
-    lastLocation
-      ? {
-          longitude: lastLocation[0],
-          latitude: lastLocation[1],
-          zoom: lastLocation[2],
-          bearing: lastLocation[3],
-        }
-      : {
-          longitude: -79.3934,
-          latitude: 43.7169,
-          zoom: 11.25,
-        }
-  );
+  const mapRef = useRef<MapRef>();
 
   const { target: mapTarget, setTarget: setMapTarget } = useMapTarget();
   useEffect(() => {
@@ -138,10 +151,10 @@ export const OverviewMap = (props: OverviewMapProps) => {
     }
   }, [mapTarget]);
 
-  const handleViewportChange = (v: Viewport) => {
-    setViewport(v);
+  const handleViewportChange = (e: ViewStateChangeEvent) => {
     setMapTarget(undefined);
-    setLastLocation([v.longitude, v.latitude, v.zoom, v.bearing ?? 0]);
+    const { longitude, latitude, zoom, bearing } = e.viewState;
+    setLastLocation([longitude, latitude, zoom, bearing ?? 0]);
   };
 
   useEffect(() => {
@@ -166,6 +179,8 @@ export const OverviewMap = (props: OverviewMapProps) => {
 
   const [labelStyle, setLabelStyle] = useState<{}[]>([]);
 
+  const [popupTarget, setPopupTarget] = useState<Position>(null);
+
   const handleClick = (event: any) => {
     if (event.features == null) return;
 
@@ -175,7 +190,7 @@ export const OverviewMap = (props: OverviewMapProps) => {
           feature.properties.url != null &&
           feature.properties.url !== "null"
         ) {
-          window.parent.location.href = `${BASE_URL}/${feature.properties.url}`;
+          window.parent.location.href = feature.properties.url;
         }
         break;
       } else if (feature.properties.type === "region-label") {
@@ -190,6 +205,12 @@ export const OverviewMap = (props: OverviewMapProps) => {
     if (canvas == null) return;
 
     canvas.style.cursor = "pointer";
+    if (e.features.length > 0) {
+      const feature = e.features[0];
+      if (feature.properties.url != null && feature.geometry.type === "Point") {
+        setPopupTarget(feature.geometry.coordinates);
+      }
+    }
   };
 
   const handleMouseLeave = (e: any) => {
@@ -197,6 +218,7 @@ export const OverviewMap = (props: OverviewMapProps) => {
     if (canvas == null) return;
 
     canvas.style.cursor = "";
+    setPopupTarget(null);
   };
 
   useEffect(() => {
@@ -215,133 +237,186 @@ export const OverviewMap = (props: OverviewMapProps) => {
     setLabelStyle(provideLabelStyle(props.lines, lineFilterState));
   }, [props.lines, lineFilterState]);
 
-  const clickableLayers = [
-    "rail-station",
-    "rail-labels",
-    "yard-labels",
-    "regions-labels",
-  ];
+  const [clickableLayers, setClickableLayers] = useState([]);
+
+  useEffect(() => {
+    if (showLabels) {
+      setClickableLayers([
+        "rail-station",
+        "rail-labels",
+        "yard-labels",
+        "regions-labels",
+      ]);
+    } else {
+      setClickableLayers(["rail-station", "regions-labels"]);
+    }
+  }, [showLabels]);
+
+  const { geolocation: userPosition } = useGeolocation();
 
   return (
-    <MapGL
+    <Map
       style={{ width: windowSize[0], height: windowSize[1] }}
       mapStyle={style}
-      accessToken={MAPBOX_KEY}
+      mapboxAccessToken={MAPBOX_KEY}
       hash={true}
-      onViewportChange={handleViewportChange}
-      onClick={[clickableLayers, handleClick]}
-      onMouseenter={[clickableLayers, handleMouseEnter]}
-      onMouseleave={[clickableLayers, handleMouseLeave]}
-      onLoad={() => {
-        setMapLoaded(true);
-      }}
+      onMoveEnd={handleViewportChange}
+      onClick={handleClick}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       ref={mapRef}
-      {...viewport}
+      initialViewState={initialLocation}
       attributionControl={false}
+      maxPitch={85}
+      interactiveLayerIds={clickableLayers}
     >
-      {mapLoaded && (
-        <>
-          <Source
-            id="regions"
-            type="geojson"
-            data={regionData as FeatureCollection}
-          />
-          <AttributionControl
-            compact={windowSize[0] <= 600}
-            position="bottom-right"
-            customAttribution={`Updated on ${new Date(
-              BUILD_DATE
-            ).toLocaleDateString()}`}
-          />
-          <NavigationControl showCompass showZoom position="bottom-right" />
-          <LabelProviderContext.Provider value={{ labelStyle }}>
-            {Object.values(props.lines)
-              .filter((entry) => entry.icon != null)
-              .map((entry) => (
-                <MapIcon
-                  style={style}
-                  width={16}
-                  height={16}
-                  id={entry.id}
-                  key={entry.id}
-                  url={`icons/${entry.icon}`}
-                />
-              ))}
+      <AttributionControl
+        compact={windowSize[0] <= 600}
+        position="bottom-right"
+        customAttribution={`Updated on ${new Date(
+          BUILD_DATE
+        ).toLocaleDateString()}`}
+      />
+      <LabelProviderContext.Provider value={{ labelStyle }}>
+        {Object.values(props.lines)
+          .filter((entry) => entry.icon != null)
+          .map((entry) => (
             <MapIcon
               style={style}
-              width={24}
-              height={24}
-              id="label-background"
-              url={labelBackground}
+              width={16}
+              height={16}
+              id={entry.id}
+              key={entry.id}
+              url={`icons/${entry.icon}`}
             />
-            <Layer
-              id="sky"
-              type="sky"
-              paint={
-                {
-                  "sky-atmosphere-sun": isDarkTheme ? [0, 95] : [0, 0],
-                } as unknown
-              }
-            />
+          ))}
+        <MapIcon
+          style={style}
+          width={24}
+          height={24}
+          id="label-background"
+          url={labelBackground}
+        />
+        <Layer
+          id="sky"
+          type="sky"
+          paint={{
+            "sky-atmosphere-sun": isDarkTheme ? [0, 95] : [0, 0],
+          }}
+        />
 
-            {show3DBuildings && (
-              <Layer
-                id="3d-buildings"
-                source="composite"
-                {...{ "source-layer": "building" }}
-                filter={["==", "extrude", "true"]}
-                type="fill-extrusion"
-                minzoom={15}
-                paint={{
-                  "fill-extrusion-color": isDarkTheme ? "#212121" : "#FFFFFF",
-
-                  // use an 'interpolate' expression to add a smooth transition effect to the
-                  // buildings as the user zooms in
-                  "fill-extrusion-height": [
-                    "interpolate",
-                    ["linear"],
-                    ["zoom"],
-                    15,
-                    0,
-                    15.05,
-                    ["get", "height"],
-                  ],
-                  "fill-extrusion-base": [
-                    "interpolate",
-                    ["linear"],
-                    ["zoom"],
-                    15,
-                    0,
-                    15.05,
-                    ["get", "min_height"],
-                  ],
-                  "fill-extrusion-opacity": 0.6,
-                }}
-              />
-            )}
-            <Lines
-              data={props.features}
-              showLineLabels={showLabels}
-              filterList={provideFilterList(lineFilterState)}
-            />
-          </LabelProviderContext.Provider>
+        {show3DBuildings && (
           <Layer
-            id="regions-labels"
-            source="regions"
-            type="symbol"
-            layout={{
-              "text-field": ["get", "name"],
-              "text-size": 20,
-            }}
+            id="3d-buildings"
+            source="composite"
+            {...{ "source-layer": "building" }}
+            filter={["==", "extrude", "true"]}
+            type="fill-extrusion"
+            minzoom={15}
             paint={{
-              "text-color": isDarkTheme ? "#FFFFFF" : "#121212",
-              "text-halo-color": isDarkTheme ? "#121212" : "#FFFFFF",
-              "text-halo-width": 2,
+              "fill-extrusion-color": isDarkTheme ? "#212121" : "#FFFFFF",
+
+              // use an 'interpolate' expression to add a smooth transition effect to the
+              // buildings as the user zooms in
+              "fill-extrusion-height": [
+                "interpolate",
+                ["linear"],
+                ["zoom"],
+                15,
+                0,
+                15.05,
+                ["get", "height"],
+              ],
+              "fill-extrusion-base": [
+                "interpolate",
+                ["linear"],
+                ["zoom"],
+                15,
+                0,
+                15.05,
+                ["get", "min_height"],
+              ],
+              "fill-extrusion-opacity": 0.6,
             }}
-            maxzoom={9}
           />
-        </>
+        )}
+        <Lines
+          data={props.features}
+          showLineLabels={showLabels}
+          filterList={provideFilterList(
+            lineFilterState,
+            Object.values(props.lines)
+          )}
+        />
+      </LabelProviderContext.Provider>
+      <Source
+        id="regions"
+        type="geojson"
+        data={regionData as FeatureCollection}
+      >
+        <Layer
+          id="regions-labels"
+          type="symbol"
+          layout={{
+            "text-field": ["get", "name"],
+            "text-size": 20,
+          }}
+          paint={{
+            "text-color": isDarkTheme ? "#FFFFFF" : "#121212",
+            "text-halo-color": isDarkTheme ? "#121212" : "#FFFFFF",
+            "text-halo-width": 2,
+          }}
+          maxzoom={9}
+        />
+      </Source>
+      {popupTarget && (
+        <Popup
+          longitude={popupTarget[0]}
+          latitude={popupTarget[1]}
+          closeButton={false}
+          anchor="top-left"
+          offset={4}
+          className="mapbox-popup"
+        >
+          View Station Profile
+        </Popup>
       )}
-    </MapGL>
+      {showGeolocation && userPosition && (
+        <Source
+          type="geojson"
+          data={{
+            type: "FeatureCollection",
+            features: [
+              {
+                type: "Feature",
+                geometry: { type: "Point", coordinates: userPosition },
+                properties: {},
+              },
+            ],
+          }}
+        >
+          <Layer
+            id="geolocation-circle-glow"
+            type="circle"
+            paint={{
+              "circle-color": "#5fb7ff",
+              "circle-radius": 12,
+              "circle-blur": 1,
+            }}
+          />
+          <Layer
+            id="geolocation-circle"
+            type="circle"
+            paint={{
+              "circle-color": "#038cfc",
+              "circle-radius": 6,
+              "circle-stroke-color": "#FFFFFF",
+              "circle-stroke-width": 2,
+            }}
+          />
+        </Source>
+      )}
+      <MapControls />
+    </Map>
   );
 };

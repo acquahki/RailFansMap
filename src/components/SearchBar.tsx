@@ -41,15 +41,16 @@ const SearchContainer = styled.div`
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+  z-index: 10;
 
   @media (max-width: 600px) {
     width: 100%;
   }
 `;
 
-const SearchBarPaper = styled(Paper)<{ expanded: boolean }>`
-  padding: ${({ theme, expanded }) => theme.spacing(0.25)};
-  width: ${(props) => (props.expanded ? "100%" : "48px")};
+const SearchBarPaper = styled(Paper)<{ $expanded: boolean }>`
+  padding: ${({ theme, $expanded }) => theme.spacing(0.25)};
+  width: ${(props) => (props.$expanded ? "100%" : "48px")};
   transition: ${({ theme }) => theme.transitions.create(["width", "padding"])};
   overflow: clip;
   display: flex;
@@ -141,8 +142,11 @@ const MobileSearch = (props: SearchProps) => {
   const { searchOpen, setSearchOpen } = useAppState();
 
   return (
-    <SearchBarPaper expanded={searchOpen}>
-      <SearchButton onClick={() => setSearchOpen(!searchOpen)}>
+    <SearchBarPaper $expanded={searchOpen}>
+      <SearchButton
+        aria-label="Search Button"
+        onClick={() => setSearchOpen(!searchOpen)}
+      >
         <Search />
       </SearchButton>
       <SearchInput
@@ -154,6 +158,7 @@ const MobileSearch = (props: SearchProps) => {
       />
       {searchOpen && (
         <SearchButton
+          aria-label="Close Search"
           onClick={() => {
             props.onQueryUpdate("");
             setSearchOpen(false);
@@ -169,8 +174,8 @@ const MobileSearch = (props: SearchProps) => {
 const DesktopSearch = (props: SearchProps) => {
   const { searchOpen, setSearchOpen } = useAppState();
   return (
-    <SearchBarPaper expanded>
-      <SearchButton>
+    <SearchBarPaper $expanded>
+      <SearchButton aria-label="Search Button">
         <Search />
       </SearchButton>
       <SearchInput
@@ -182,6 +187,7 @@ const DesktopSearch = (props: SearchProps) => {
       />
       {searchOpen && (
         <SearchButton
+          aria-label="Close Search"
           onClick={() => {
             props.onQueryUpdate("");
             setSearchOpen(false);
